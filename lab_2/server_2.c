@@ -50,9 +50,8 @@ int main() {
 
     char buffer[1024]; // Буфер для хранения сообщений
 
-    fd_set read_fds, except_fds;
+    fd_set read_fds;
     FD_ZERO(&read_fds);
-    FD_ZERO(&except_fds);
 
     while (1) {
         if (got_sighup) {
@@ -64,13 +63,13 @@ int main() {
         }
 
         FD_SET(server_socket, &read_fds);
-        FD_SET(server_socket, &except_fds);
 
+        sigset_t mask;
         struct timespec timeout;
         timeout.tv_sec = 1;
         timeout.tv_nsec = 0;
 
-        int result = pselect(server_socket + 1, &read_fds, NULL, &except_fds, &timeout, NULL);
+        int result = pselect(server_socket + 1, &read_fds, NULL, NULL, &timeout, mask);
 
         if (result == -1) {
             perror("Error in pselect");
@@ -92,13 +91,7 @@ int main() {
             }
         }
 
-        if (FD_ISSET(server_socket, &except_fds)) {
-            printf("Exceptional condition on server socket\n");
-            // Handle exceptional condition if needed
-        }
-
-        // Your code for handling data from accepted_socket goes here
-        ssize_t bytes_received = recv(accepted_socket, buffer, sizeof(buffer), 0);
+        size_t bytes_received = recv(accepted_socket, buffer, sizeof(buffer), 0);
 
         if (bytes_received > 0) {
             buffer[bytes_received] = '\0';
