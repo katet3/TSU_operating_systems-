@@ -69,7 +69,7 @@ int main() {
         timeout.tv_sec = 1;
         timeout.tv_nsec = 0;
 
-        int result = pselect(server_socket + 1, &read_fds, NULL, NULL, &timeout, mask);
+        int result = pselect(server_socket + 1, &read_fds, NULL, NULL, &timeout, &mask);
 
         if (result == -1) {
             perror("Error in pselect");
