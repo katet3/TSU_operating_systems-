@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <errno.h>
 
 volatile sig_atomic_t got_sighup = 0;
 int accepted_socket = -1;
@@ -72,8 +73,13 @@ int main() {
         int result = pselect(server_socket + 1, &read_fds, NULL, NULL, &timeout, &mask);
 
         if (result == -1) {
-            perror("Error in pselect");
-            continue;
+            if (errno == EINTR) {
+                printf("pselect was interrupted by a signal.\n");
+                continue;
+            } else {
+                perror("Error in pselect");
+                break;
+            }
         }
 
         if (FD_ISSET(server_socket, &read_fds)) {

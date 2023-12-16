@@ -82,7 +82,7 @@ void* consumer(void* arg) {
 }
 
 
-int main() {
+static int main() {
     pthread_t producer_thread, consumer_thread;
 
     // Создание потока производителя
